@@ -183,7 +183,7 @@ define projects::project::apache::vhost (
   }
 
   $directories = [
-    { path => $docroot, options => $options },
+    { path => $full_docroot, options => $options },
   ]
 
   ::apache::vhost { $title:
