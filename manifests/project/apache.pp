@@ -147,6 +147,7 @@ define projects::project::apache::vhost (
   $altnames = [],
   $ip = undef,
   $cert_name = $vhost_name,
+  $redirect_to_https = false,
 ) {
 
   if ($ip) {
@@ -186,32 +187,56 @@ define projects::project::apache::vhost (
     { path => $full_docroot, options => $options },
   ]
 
-  ::apache::vhost { $title:
-    servername            => $vhost_name,
-    port                  => $port,
-    ssl                   => $ssl,
-    docroot               => $full_docroot,
-    directories           => $directories,
-    logroot               => "${::projects::basedir}/${projectname}/var/log/httpd",
-    use_optional_includes => "true",
-    additional_includes   => 
+  if $redirect_to_https {
+    ::apache::vhost { $title:
+      servername            => $vhost_name,
+      port                  => $port,
+      docroot               => $full_docroot,
+      redirect_status       => 'permanent',
+      redirect_dest         => "https://${title}/",
+      logroot               => "${::projects::basedir}/${projectname}/var/log/httpd",
+      use_optional_includes => "true",
+      additional_includes   => 
       ["${::projects::basedir}/${projectname}/etc/apache/conf.d/*.conf",
       "${::projects::basedir}/${projectname}/etc/apache/conf.d/${title}/*.conf"],
-    ssl_cert              => 
+      access_log_env_var    => "!forwarded",
+      custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
+      SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
+      CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
+      ip                    => $ip,
+      ip_based              => $ip_based,
+      add_listen            => false,
+      headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+    }
+  }
+  else {
+    ::apache::vhost { $title:
+      servername            => $vhost_name,
+      port                  => $port,
+      ssl                   => $ssl,
+      docroot               => $full_docroot,
+      directories           => $directories,
+      logroot               => "${::projects::basedir}/${projectname}/var/log/httpd",
+      use_optional_includes => "true",
+      additional_includes   => 
+      ["${::projects::basedir}/${projectname}/etc/apache/conf.d/*.conf",
+      "${::projects::basedir}/${projectname}/etc/apache/conf.d/${title}/*.conf"],
+      ssl_cert              => 
       "${::projects::basedir}/${projectname}/etc/ssl/certs/${cert_name}.crt",
-    ssl_chain             => 
+      ssl_chain             => 
       "${::projects::basedir}/${projectname}/etc/ssl/certs/${cert_name}.crt",
-    ssl_key               => 
+      ssl_key               => 
       "${::projects::basedir}/${projectname}/etc/ssl/private/${cert_name}.key",
-    serveraliases         => $altnames,
-    access_log_env_var    => "!forwarded",
-    custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
-SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
-CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
-    ip                  => $ip,
-    ip_based            => $ip_based,
-    add_listen          => false,
-    headers             => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      serveraliases         => $altnames,
+      access_log_env_var    => "!forwarded",
+      custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
+      SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
+      CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
+      ip                  => $ip,
+      ip_based            => $ip_based,
+      add_listen          => false,
+      headers             => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+    }
   }
 
   if !defined(Apache::Listen["$port"]) {
