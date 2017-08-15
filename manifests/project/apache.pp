@@ -139,6 +139,7 @@ define projects::project::apache::vhost (
   $projectname = undef,
   $docroot = 'www',
   $options = ['Indexes','FollowSymLinks','MultiViews'],
+  $override = ['None'],
   $port = 80,
   $vhost_name = $title,
   $ssl = false,
@@ -184,7 +185,7 @@ define projects::project::apache::vhost (
   }
 
   $directories = [
-    { path => $full_docroot, options => $options },
+    { path => $full_docroot, options => $options, override => $override },
   ]
 
   if $redirect_to_https {
