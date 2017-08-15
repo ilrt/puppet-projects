@@ -139,7 +139,7 @@ define projects::project::apache::vhost (
   $projectname = undef,
   $docroot = 'www',
   $options = ['Indexes','FollowSymLinks','MultiViews'],
-  $override = ['None'],
+  $allow_override = ['None'],
   $port = 80,
   $vhost_name = $title,
   $ssl = false,
