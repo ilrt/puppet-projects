@@ -185,7 +185,7 @@ define projects::project::apache::vhost (
   }
 
   $directories = [
-    { path => $full_docroot, options => $options, override => $override },
+    { path => $full_docroot, options => $options, allow_override => $allow_override },
   ]
 
   if $redirect_to_https {
