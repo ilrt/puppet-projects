@@ -1,0 +1,240 @@
+#!/bin/bash
+
+# Allow users to reset permissions on directory structures to the defaults
+export PATH="/usr/local/bin:/usr/bin:/bin"
+set -e
+
+Base='/srv/projects'
+WebUser='apache'
+DefDirMod='2775'
+DefFileMod='u+rw,g+rw,o+r-w'
+
+readonly Base WebUser DefDirMod DefFileMod
+
+WebFile='FALSE'
+UserFile='FALSE'
+Warn='TRUE'
+Default=''
+
+# All output goes to stderr
+exec >&2
+
+if [ $(id -u) -gt 0 ] ;then
+	echo "You need to execute this script via sudo"
+	exit 1
+fi
+
+if ! echo "$SUDO_USER" | egrep "^[a-z0-9]+$" ;then
+	echo "Security breach attempted, exiting."
+	exit 2
+fi
+
+# How to get real path
+if [ -x '/usr/bin/realpath' ];then
+	RealPath='/usr/bin/realpath'
+elif [ -x '/bin/readlink' ] ;then
+	RealPath='/bin/readlink -f'
+else
+	echo "No reliable method to find the real path to files"
+	exit 3
+fi
+
+helpme() {
+	echo "Usage: $0 [-uwdF] [$Base/path/to/file] [...]"
+	echo "  -u    Make the owner the top level project directory user"
+	echo "  -w    Make the owner the web server user $WebUser."
+	echo "  -d    Debug, just print commands do not make changes."
+	echo "  -F    Force changes without warning message."
+	#echo "  -p    Make the dirs/files not read/exec to other users"
+	#echo "  -e    Exclude path"
+	#echo "  -f    Exclude paths from file"
+	echo
+	echo "   The default directory mode is $DefDirMod"
+	echo "   The default file mode is $DefFileMod"
+	echo "   If a directory is given for path then the permissions"
+	echo "   change will be recursive"
+	echo "   This script will NOT change the permissions of devices,"
+	echo "   fifos, symlinks, etc"
+	echo "   It will also NOT change the permissions of files owned"
+	echo "   by root or group root"
+	exit 0
+}
+
+while getopts "e:f:uwdhF" option; do
+
+        case "${option}" in
+
+                # Append to exclusion list
+                #e)      Exclude="$Exclude $OPTARG" ;;
+		# Get exclusions from file
+		#f)	ExclFile="$OPTARG" ;;
+		# Enable user reset
+		u)	UserFile='TRUE' ;;
+		# Enable web user
+		w)	WebFile='TRUE' ;;
+		# Debug
+		d)	declare -r Debug="echo + " ;;
+		# Help
+		h)	helpme ;;
+		# Warn
+		F)	Warn='FALSE' ;;
+
+	esac
+
+done
+
+# Get rid of options
+# Badly assumes we will never have files/dirs starting with a -
+#for arg in $@ ;do
+#	if echo $arg |grep -q ^- ;then
+#		shift
+#	fi
+#done
+shift $(( OPTIND - 1 ))
+
+if [[ "$UserFile" == 'TRUE' && "$WebFile" == 'TRUE' ]] ;then
+	echo "-w and -u are mutually exclusive options."
+	exit 4
+fi
+
+if [ $# -eq 0 ] ;then
+	# We've run out of paths!
+	Paths="."
+else
+	Paths=("$@")
+fi
+
+for Path in "${Paths[@]}" ;do
+
+	echo "Processing $Path"
+
+	if [ -d "$Path" ] ;then
+		Dir=$(readlink -f $Path)
+		Type='d'
+	elif [ -f "$Path" ] ;then
+		Dir=$(readlink -f ${Path%/*})
+		Type='f'
+	else
+		echo "Unsupported file type"
+		continue
+	fi
+
+	if [ -z "$Dir" ] ;then
+		echo "Directory not found from path: $Path"
+		continue
+	fi
+
+	# Don't allow changes outside of $Base.
+	if ! echo "$Dir" | grep -q "^$Base/" ;then
+		echo "You can only change permissions on directory paths below: $Base"
+		echo " !! Skipping path $Path"
+		continue
+	fi
+
+	# Make sure they're not trying to change permissions on areas which would break apps
+	if echo "$Dir" | egrep -q "^$Base/[^/]*/(apache|tomcat|zope|zeo)" ;then
+		echo ": changing permissions under $Dir may break the application!"
+	fi
+ 
+	# Get the group name of the parent dir
+	Tail="${Dir#$Base/}"
+	ProjectDir="${Tail%%/*}"
+	Group=$(stat -c "%G" $Base/$ProjectDir)
+
+	# Get the top level user name
+	if [ "$UserFile" == 'TRUE' ] ; then
+		User=$(stat -c "%U" $Base/$ProjectDir)
+	fi
+
+	# Make sure this user has rights to change permissions
+	# They must have group writable access to the parent directory
+	Accept='FALSE'
+	groups=($(groups "$SUDO_USER"))
+	for g in "${groups[@]}";do
+		if [ "$g" == "$Group" ];then Accept='TRUE';break ;fi
+	done
+	if [ "$Accept" != 'TRUE' ] ;then
+		echo "You do not have sufficient rights to change permissions here: $Dir"
+		echo "You need to be in group: $Group"
+		exit 5
+	fi
+
+	# FIXME Process exclusions
+
+	# Ask questions and warn about changes
+	if [ "$Warn" == "TRUE" ] ;then
+		echo "Warning: Resetting permissions on $Path"
+		echo "+ Setting Group to $Group"
+		if [ "$WebFile" == 'TRUE' ] ; then
+			echo "+ Setting User to $WebUser"
+		fi
+		if [ "$UserFile" == 'TRUE' ] ; then
+			echo "+ Setting User to $User"
+		fi
+		echo "+ Setting default file mode of $DefFileMod"
+		echo "+ Setting default directory mode of $DefDirMod"
+		echo "+ NOT changing root owner/group"
+		echo
+		echo -n "Are you sure you want to continue? N|y: "
+		read q
+		case $q in
+			Y|y)	: ;;
+			*)	exit 6 ;;
+		esac
+	fi
+
+	# Setup common find command
+	_find() {
+		path=$1
+		shift
+		$Debug find -P $path \
+		 \! -user root \
+		 \! -group root \
+		 \! -perm -u=s \
+		 "$@"
+	}
+
+	# We are careful to not recurse into symlinked directories and we make sure we
+	# are only changing files and directories not fifos, symlinks, devices, etc.
+	if [ "$Type" == 'd' ] ;then
+
+		# Change the owner if needed
+		if [ "$UserFile" == 'TRUE' ] ; then
+			_find $Dir \
+			 \( -type d -o -type f \) \
+			 -exec chown -c $User {} \;
+		elif [ "$WebFile" == 'TRUE' ] ;then
+			_find $Dir \
+			 \( -type d -o -type f \) \
+			 -exec chown -c $WebUser {} \;
+		fi
+
+		# Change the group
+		_find $Dir \
+		 \( -type d -o -type f \) \
+		 -exec chgrp -c $Group {} \;
+		# Set default modes
+		_find $Dir -type d \
+		 -exec chmod -c $DefDirMod {} \;
+		_find $Dir -type f \
+		 -exec chmod -c $DefFileMod {} \;
+	fi
+
+	# Do the same but for a single file
+	if [ "$Type" == 'f' ] ;then
+		if [ "$UserFile" == 'TRUE' ] ; then
+			_find $Path \
+			 -type f \
+			 -exec chown -c $User {} \;
+		elif [ "$WebFile" == 'TRUE' ] ;then
+			_find $Path \
+			 -type f \
+			 -exec chown -c $WebUser {} \;
+		fi
+		_find $Path \
+		 -type f \
+                 -exec chmod -c $DefFileMod {} \;
+	fi
+	echo "Done"
+
+done
