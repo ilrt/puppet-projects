@@ -139,6 +139,13 @@ define projects::project (
     priority => 25,
     content  => "%${title} ALL=(ALL) NOPASSWD: /usr/local/bin/reset-perms"
   }
+
+  file { '/usr/local/bin/reset-perms':
+    source  => "puppet:///modules/projects/bin/reset-perms",
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0755',
+  }
 }
 
 define project_user (
