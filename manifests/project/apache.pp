@@ -149,6 +149,7 @@ define projects::project::apache::vhost (
   $ip = undef,
   $cert_name = $vhost_name,
   $redirect_to_https = false,
+  $php_values = {},
 ) {
 
   if ($ip) {
@@ -233,10 +234,11 @@ define projects::project::apache::vhost (
       custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
       SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
       CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
-      ip                  => $ip,
-      ip_based            => $ip_based,
-      add_listen          => false,
-      headers             => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      ip                    => $ip,
+      ip_based              => $ip_based,
+      add_listen            => false,
+      headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      php_values            => $php_values,
     }
   }
 
