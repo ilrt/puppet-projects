@@ -30,5 +30,12 @@ class projects (
     target => $basedir,
   }
 
+  file { '/usr/local/bin/reset-perms':
+    source  => "puppet:///modules/projects/bin/reset-perms",
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0755',
+  }
+
   create_resources('projects::project', $projects)
 }
