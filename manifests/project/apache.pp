@@ -282,7 +282,7 @@ define projects::project::apache::vhost (
       ensure  => directory,
       owner   => $apache_user,
       group   => $projectname,
-      mode    => '0570',
+      mode    => '0750',
       seltype => 'httpd_sys_content_t',
     }
   }
