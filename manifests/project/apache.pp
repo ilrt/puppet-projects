@@ -5,10 +5,11 @@ define projects::project::apache (
   $vhosts           = {},
   $apache_user      = 'apache',
   $apache_common    = {},
+  $default_vhost    = true,
 ) {
   if !defined(Class['::apache']) {
     ensure_resource('class', '::apache', {
-      default_vhost         => true,
+      default_vhost         => $default_vhost,
       use_optional_includes => true,
       mpm_module            => false,
       service_ensure        => running,
