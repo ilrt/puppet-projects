@@ -6,6 +6,7 @@ define projects::project (
   $tomcat = {},
   $mysql = {},
   $apache_common = {},
+  $default_vhost = true,
   $uid = undef,
   $gid = undef,
   $users = [],
@@ -115,6 +116,7 @@ define projects::project (
     projects::project::apache { $title:
       vhosts        => $apache,
       apache_common => $apache_common,
+      default_vhost => $default_vhost,
     }
   }
 
