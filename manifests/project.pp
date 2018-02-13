@@ -31,8 +31,11 @@ define projects::project (
       members => $users,
     }
 
-    project_user { $users:
-      group => $title
+    $users.each |$u| {
+      project_user { "${title} - user ${u}":
+        user  => $u,
+        group => $title,
+      }
     }
 
     file { [
@@ -144,10 +147,11 @@ define projects::project (
 }
 
 define project_user (
+  $user,
   $group = undef
 ) {
-  create_resources('@user', { $title => {} })
-  User <| title == $title |> {
+  create_resources('@user', { $user => {} })
+  User <| title == $user |> {
     groups +> $group,
   }
 }
