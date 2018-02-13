@@ -150,7 +150,7 @@ define project_user (
   $user,
   $group = undef
 ) {
-  create_resources('@user', { $user => {} })
+  ensure_resources('user', { $user => {} })
   User <| title == $user |> {
     groups +> $group,
   }
