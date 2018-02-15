@@ -46,7 +46,7 @@ define projects::project::apache (
 
 
   if $apache_common['php'] {
-    ensure_resource('class', '::apache::mod::php', {})
+    include '::apache::mod::php'
     ensure_packages(['php-pdo', 'php-mysql', 'php-mbstring', 'php-snmp'])
   }
 
