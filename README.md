@@ -39,7 +39,7 @@ projects is `/srv/projects/<projectname>`, but can be changed using the
 
 ### Setup Requirements
 
-The module assumes that the projects::projects key uses the deep merge behaviour, which is enabled by adding
+The module assumes that the `projects::projects` key uses the deep merge behaviour, which is enabled by adding
 
 ```
 lookup_options:
@@ -64,6 +64,7 @@ or in Hiera:
 ---
 classes:
   - projects
+```
 
 An example hiera hash is as follows:
 
