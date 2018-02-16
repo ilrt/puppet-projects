@@ -127,7 +127,7 @@ The `apache` key contains a hash for virtualhost to configure for the project. E
 * `altnames`: List of serveraliases to respond to (default: []).
 * `docroot`: alternative directory under <basedir>/var/ to use as the docroot. Default: www
 * `ip`: Enables IP virtualhosting instead of namebased virtual hosting and only listens on the IP specified.
-* `allow_override`: An array giving the Apache AllowOverride option for the vhost. (dfault: None)
+* `allow_override`: An array giving the Apache AllowOverride option for the vhost. (default: None)
 * `options`: An array giving the Apache Options option for the vhost. (default: Indexes, FollowSymLinks, MultiViews)
 * `cert_name`: The base name of the certificate file, without `.crt` or `.key` extension. The `.crt` and `.key` files are assumed to be in `/srv/projects/projectname/etc/ssl/{certs,private}`. The default is `vhost_name`.
 * `redirect`: A string representing a URL. Forward all requests to the URL.
