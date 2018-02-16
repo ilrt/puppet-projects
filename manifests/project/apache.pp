@@ -134,7 +134,14 @@ define projects::project::apache (
 
 # -- Resource type: project::apache::vhost
 #
-# Configures and projec apache vhost.
+# Configures and project apache vhost.
+#
+# "forwarded_custom_log" decides whether to include custom log config
+# fragments to handle forwarded (with X-Forwarded-For header)
+# connections.  This is a legacy option and the use of "mod_remoteip"
+# should be used in preference to this.
+#   Enabled by default at present but a future release will disable this.
+#
 define projects::project::apache::vhost (
   $projectname = undef,
   $docroot = 'www',
@@ -151,6 +158,7 @@ define projects::project::apache::vhost (
   $redirect = undef,
   $redirect_to_https = false,
   $php_values = {},
+  $forwarded_custom_log = true,
 ) {
 
   if ($ip) {
@@ -190,6 +198,17 @@ define projects::project::apache::vhost (
     { path => $full_docroot, options => $options, allow_override => $allow_override },
   ]
 
+  if $forwarded_custom_log {
+    $custom_log_entries = {
+      access_log_env_var    => "!forwarded",
+      custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
+      SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
+      CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
+    }
+  } else {
+    $custom_log_entries = {}
+  }
+
   if $redirect {
     ::apache::vhost { $title:
       servername            => $vhost_name,
@@ -210,14 +229,11 @@ define projects::project::apache::vhost (
       ssl_key               => 
       "${::projects::basedir}/${projectname}/etc/ssl/private/${cert_name}.key",
       serveraliases         => $altnames,
-      #access_log_env_var    => "!forwarded",
-      #custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
-      #SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
-      #CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
       headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      *                     => $custom_log_entries,
     }
   }
   elsif $redirect_to_https {
@@ -232,14 +248,11 @@ define projects::project::apache::vhost (
       additional_includes   => 
       ["${::projects::basedir}/${projectname}/etc/apache/conf.d/*.conf",
       "${::projects::basedir}/${projectname}/etc/apache/conf.d/${title}/*.conf"],
-      #access_log_env_var    => "!forwarded",
-      #custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
-      #SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
-      #CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
       headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      *                     => $custom_log_entries,
     }
   }
   else {
@@ -261,15 +274,12 @@ define projects::project::apache::vhost (
       ssl_key               => 
       "${::projects::basedir}/${projectname}/etc/ssl/private/${cert_name}.key",
       serveraliases         => $altnames,
-      #access_log_env_var    => "!forwarded",
-      #custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
-      #SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
-      #CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
       headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
       php_values            => $php_values,
+      *                     => $custom_log_entries,
     }
   }
 
