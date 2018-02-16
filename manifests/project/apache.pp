@@ -44,7 +44,6 @@ define projects::project::apache (
     }
   }
 
-
   if $apache_common['php'] {
     include '::apache::mod::php'
     ensure_packages(['php-pdo', 'php-mysql', 'php-mbstring', 'php-snmp'])
@@ -211,10 +210,10 @@ define projects::project::apache::vhost (
       ssl_key               => 
       "${::projects::basedir}/${projectname}/etc/ssl/private/${cert_name}.key",
       serveraliases         => $altnames,
-      access_log_env_var    => "!forwarded",
-      custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
-      SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
-      CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
+      #access_log_env_var    => "!forwarded",
+      #custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
+      #SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
+      #CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
@@ -233,10 +232,10 @@ define projects::project::apache::vhost (
       additional_includes   => 
       ["${::projects::basedir}/${projectname}/etc/apache/conf.d/*.conf",
       "${::projects::basedir}/${projectname}/etc/apache/conf.d/${title}/*.conf"],
-      access_log_env_var    => "!forwarded",
-      custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
-      SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
-      CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
+      #access_log_env_var    => "!forwarded",
+      #custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
+      #SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
+      #CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
@@ -262,10 +261,10 @@ define projects::project::apache::vhost (
       ssl_key               => 
       "${::projects::basedir}/${projectname}/etc/ssl/private/${cert_name}.key",
       serveraliases         => $altnames,
-      access_log_env_var    => "!forwarded",
-      custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
-      SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
-      CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
+      #access_log_env_var    => "!forwarded",
+      #custom_fragment       => "LogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" proxy
+      #SetEnvIf X-Forwarded-For \"^.*\\..*\\..*\\..*\" forwarded
+      #CustomLog \"${::projects::basedir}/${projectname}/var/log/httpd/${title}_access.log\" proxy env=forwarded",
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
