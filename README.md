@@ -60,7 +60,7 @@ include projects
 
 or in Hiera:
 
-```
+```yaml
 ---
 classes:
   - projects
@@ -109,7 +109,7 @@ The following hash keys under the project shortname are used for common data. It
 * `uid`: The UID of the project user. 
 * `gid`: The GID of the project user.
 * `users`: An array of users that a members of the project.
-* `default_vhost`: Whether Apache should enable the default vhost on *:80.
+* `default_vhost`: Whether Apache should enable the default vhost on *:80. (default: yes)
 
 #### `common_apache`
 
@@ -127,11 +127,11 @@ The `apache` key contains a hash for virtualhost to configure for the project. E
 * `altnames`: List of serveraliases to respond to (default: []).
 * `docroot`: alternative directory under <basedir>/var/ to use as the docroot. Default: www
 * `ip`: Enables IP virtualhosting instead of namebased virtual hosting and only listens on the IP specified.
-* `allow_override`: An array giving the Apache AllowOverride option for the vhost.
-* `options`: An array giving the Apache Options option for the vhost.
+* `allow_override`: An array giving the Apache AllowOverride option for the vhost. (dfault: None)
+* `options`: An array giving the Apache Options option for the vhost. (default: Indexes, FollowSymLinks, MultiViews)
 * `cert_name`: The base name of the certificate file, without `.crt` or `.key` extension. The `.crt` and `.key` files are assumed to be in `/srv/projects/projectname/etc/ssl/{certs,private}`. The default is `vhost_name`.
 * `redirect`: A string representing a URL. Forward all requests to the URL.
-* `redirect_to_https`: Forward all requests to the `https` version of the vhost.
+* `redirect_to_https`: Forward all requests to the `https` version of the vhost. (default: no)
 * `php_values`: Set Apache php_value options for this vhost. The values are given as a hash of keys and values.
 
 
