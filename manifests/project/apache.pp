@@ -75,7 +75,7 @@ define projects::project::apache (
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
-      source  => epp('projects/apache/wsgi3.conf.epp', { mod_wsgi_so => $mod_wsgi_so }),
+      content => epp('projects/apache/wsgi3.conf.epp', { mod_wsgi_so => $mod_wsgi_so }),
       require => Package['httpd'],
       notify  => Service['httpd'],
     }
