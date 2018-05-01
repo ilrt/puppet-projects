@@ -39,7 +39,15 @@ projects is `/srv/projects/<projectname>`, but can be changed using the
 
 ### Setup Requirements
 
-Reading project data from hiera requires `merge_behaviour` to be set to `deeper` in hiera. This can be done by adding `:merge_behavior: deeper` to `/etc/puppet/hiera.yaml`.
+The module assumes that the `projects::projects` key uses the deep merge behaviour, which is enabled by adding
+
+```
+lookup_options:
+  projects::projects:
+    merge: deep
+```
+
+to common.yaml.
 
 ### Beginning with projects
 
@@ -50,10 +58,18 @@ It's intended that projects are defined in hiera under the `projects` top-level 
 include projects
 ```
 
+or in Hiera:
+
+```yaml
+---
+classes:
+  - projects
+```
+
 An example hiera hash is as follows:
 
 ```yaml
-projects:
+projects::projects:
   'myproject':
     description: 'My Tomcat service'
     uid: 6666
@@ -81,7 +97,7 @@ projects:
 ## Usage
 
 
-Once the `projects` class is included. You can start by building up the hiera data structure. By using the `deeper` hiera merge, you can seperate common a per-instance data.
+Once the `projects` class is included. You can start by building up the hiera data structure. By using the `deep` hiera lookup behaviour, you can seperate common a per-instance data.
 
 The key for the hash entry is the project shortname.
 
@@ -93,12 +109,13 @@ The following hash keys under the project shortname are used for common data. It
 * `uid`: The UID of the project user. 
 * `gid`: The GID of the project user.
 * `users`: An array of users that a members of the project.
+* `default_vhost`: Whether Apache should enable the default vhost on *:80. (default: yes)
 
 #### `common_apache`
 
 * `php`: Enable `mod_php`? (default: no).
 * `mpm`: Specifies MPM worker to use
-* `
+* `use_python3_wsgi`: Enable `mod_wsgi` using pip3 (default: no)
 
 ### Apache
 
@@ -110,6 +127,12 @@ The `apache` key contains a hash for virtualhost to configure for the project. E
 * `altnames`: List of serveraliases to respond to (default: []).
 * `docroot`: alternative directory under <basedir>/var/ to use as the docroot. Default: www
 * `ip`: Enables IP virtualhosting instead of namebased virtual hosting and only listens on the IP specified.
+* `allow_override`: An array giving the Apache AllowOverride option for the vhost. (default: None)
+* `options`: An array giving the Apache Options option for the vhost. (default: Indexes, FollowSymLinks, MultiViews)
+* `cert_name`: The base name of the certificate file, without `.crt` or `.key` extension. The `.crt` and `.key` files are assumed to be in `/srv/projects/projectname/etc/ssl/{certs,private}`. The default is `vhost_name`.
+* `redirect`: A string representing a URL. Forward all requests to the URL.
+* `redirect_to_https`: Forward all requests to the `https` version of the vhost. (default: no)
+* `php_values`: Set Apache php_value options for this vhost. The values are given as a hash of keys and values.
 
 
 ### Tomcat

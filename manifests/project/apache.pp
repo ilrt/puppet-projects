@@ -23,7 +23,7 @@ define projects::project::apache (
     include ::apache::mod::proxy_ajp
     include ::apache::mod::headers
     class {'::apache::mod::authnz_ldap':
-      verifyServerCert => false
+      verify_server_cert => false
     }
 
     include ::apache::mod::status
@@ -64,12 +64,17 @@ define projects::project::apache (
       require  => Package['httpd', 'httpd-devel'],
       notify   => Service['httpd'],
     }
+    if $apache_common['mod_wsgi_so'] {
+      $mod_wsgi_so = $apache_common['mod_wsgi_so']
+    } else {
+      $mod_wsgi_so = "/usr/lib64/python3.4/site-packages/mod_wsgi/server/mod_wsgi-py34.cpython-34m.so"
+    }
     file { '/etc/httpd/conf.modules.d/wsgi3.load':
       ensure  => file,
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
-      source  => 'puppet:///modules/projects/apache/wsgi3.conf',
+      content => epp('projects/apache/wsgi3.conf.epp', { mod_wsgi_so => $mod_wsgi_so }),
       require => Package['httpd'],
       notify  => Service['httpd'],
     }
