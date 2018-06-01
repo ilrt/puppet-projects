@@ -109,7 +109,7 @@ The following hash keys under the project shortname are used for common data. It
 * `uid`: The UID of the project user. 
 * `gid`: The GID of the project user.
 * `users`: An array of users that a members of the project.
-* `default_vhost`: Whether Apache should enable the default vhost on *:80. (default: yes)
+* `default_vhost`: Whether Apache should enable the default vhost on *:80. Note this isn't reliable when set to false. You may also need to set `apache::default_vhost: false` in Hiera. (default: true)
 
 #### `common_apache`
 
