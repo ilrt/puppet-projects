@@ -2,17 +2,18 @@
 #
 # A top level project type.
 define projects::project (
-  $apache        = {},
-  $tomcat        = {},
-  $mysql         = {},
-  $apache_common = {},
-  $default_vhost = true,
-  $uid           = undef,
-  $gid           = undef,
-  $users         = [],
-  $create_users  = true,
-  $ensure        = undef,
-  $description   = ""
+  $apache                    = {},
+  $tomcat                    = {},
+  $mysql                     = {},
+  $apache_common             = {},
+  $default_vhost             = true,
+  $uid                       = undef,
+  $gid                       = undef,
+  $users                     = [],
+  $create_users              = true,
+  $force_local_project_group = false,
+  $ensure                    = undef,
+  $description               = ""
 ) {
 
   # If least one project definition exists for this host, creaste the base structure
@@ -28,9 +29,12 @@ define projects::project (
     }
 
     group { $title:
-      gid     => $gid,
-      members => $users,
-      provider=> 'ggroupadd', # Requires pdxcat/group module
+      gid      => $gid,
+      members  => $users,
+      provider => $force_local_project_group ? {
+        true    => 'ggroupadd', # Requires pdxcat/group module
+        default => undef,
+      },
     }
 
     $users.each |$u| {
