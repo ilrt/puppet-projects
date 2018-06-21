@@ -10,6 +10,7 @@ define projects::project (
   $uid           = undef,
   $gid           = undef,
   $users         = [],
+  $create_users  = true,
   $ensure        = undef,
   $description   = ""
 ) {
@@ -33,8 +34,9 @@ define projects::project (
 
     $users.each |$u| {
       project_user { "${title} - user ${u}":
-        user  => $u,
-        group => $title,
+        user        => $u,
+        group       => $title,
+        create_user => $create_users,
       }
     }
 
@@ -148,9 +150,13 @@ define projects::project (
 
 define project_user (
   $user,
-  $group = undef
+  $group       = undef
+  $create_user = true,
 ) {
-  create_resources('@user', { $user => {} })
+  # If users are from an external directory, never try to create them locally
+  if $create_user {
+    create_resources('@user', { $user => {} })
+  }
   User <| title == $user |> {
     groups +> $group,
   }
