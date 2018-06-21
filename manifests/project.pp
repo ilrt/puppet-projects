@@ -150,7 +150,7 @@ define projects::project (
 
 define project_user (
   $user,
-  $group       = undef
+  $group       = undef,
   $create_user = true,
 ) {
   # If users are from an external directory, never try to create them locally
