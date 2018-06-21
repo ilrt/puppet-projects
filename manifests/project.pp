@@ -2,16 +2,16 @@
 #
 # A top level project type.
 define projects::project (
-  $apache = {},
-  $tomcat = {},
-  $mysql = {},
+  $apache        = {},
+  $tomcat        = {},
+  $mysql         = {},
   $apache_common = {},
   $default_vhost = true,
-  $uid = undef,
-  $gid = undef,
-  $users = [],
-  $ensure = undef,
-  $description = ""
+  $uid           = undef,
+  $gid           = undef,
+  $users         = [],
+  $ensure        = undef,
+  $description   = ""
 ) {
 
   # If least one project definition exists for this host, creaste the base structure
@@ -48,19 +48,19 @@ define projects::project (
     }
 
     file { "$::projects::basedir/$title/.ssh":
-      ensure   => 'directory',
-      owner  => $uid,
-      group  => $gid,
-      mode     => '700',
-      seltype  => 'ssh_home_t',
+      ensure  => 'directory',
+      owner   => $uid,
+      group   => $gid,
+      mode    => '700',
+      seltype => 'ssh_home_t',
     }
 
     file { "$::projects::basedir/$title/.settings":
-      ensure   => 'directory',
-      owner  => $uid,
-      group  => $gid,
-      mode     => '775',
-      seltype  => 'httpd_sys_content_t',
+      ensure  => 'directory',
+      owner   => $uid,
+      group   => $gid,
+      mode    => '775',
+      seltype => 'httpd_sys_content_t',
     }
 
     file { [
@@ -75,20 +75,20 @@ define projects::project (
     file { [
            "$::projects::basedir/$title/var",
            ] :
-      ensure => directory,
-      owner  => $uid,
-      group  => $gid,
+      ensure  => directory,
+      owner   => $uid,
+      group   => $gid,
       seltype => 'httpd_sys_rw_content_t',
-      mode   => '0775',
+      mode    => '0775',
     }
 
     file { [
            "$::projects::basedir/$title/lib",
            ] :
-      ensure => directory,
-      owner  => $uid,
-      group  => $gid,
-      mode   => '0775',
+      ensure  => directory,
+      owner   => $uid,
+      group   => $gid,
+      mode    => '0775',
       seltype => 'httpd_sys_content_t',
     }
 
@@ -126,7 +126,7 @@ define projects::project (
   # Create Tomcat services
   if ($tomcat != {}) {
     projects::project::tomcat { $title:
-      ajp_port      => pick($tomcat[ajp_port],'8009')
+      ajp_port => pick($tomcat[ajp_port],'8009')
     }
   }
 
