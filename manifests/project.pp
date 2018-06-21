@@ -30,6 +30,7 @@ define projects::project (
     group { $title:
       gid     => $gid,
       members => $users,
+      provider=> 'ggroupadd', # Requires pdxcat/group module
     }
 
     $users.each |$u| {
@@ -154,10 +155,11 @@ define project_user (
   $create_user = true,
 ) {
   # If users are from an external directory, never try to create them locally
+  # Group managed with pdxcat/group and "group" resource in projects::project above
   if $create_user {
     create_resources('@user', { $user => {} })
-  }
-  User <| title == $user |> {
-    groups +> $group,
+    User <| title == $user |> {
+      groups +> $group,
+    }
   }
 }
