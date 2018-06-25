@@ -2,16 +2,18 @@
 #
 # A top level project type.
 define projects::project (
-  $apache = {},
-  $tomcat = {},
-  $mysql = {},
-  $apache_common = {},
-  $default_vhost = true,
-  $uid = undef,
-  $gid = undef,
-  $users = [],
-  $ensure = undef,
-  $description = ""
+  $apache                    = {},
+  $tomcat                    = {},
+  $mysql                     = {},
+  $apache_common             = {},
+  $default_vhost             = true,
+  $uid                       = undef,
+  $gid                       = undef,
+  $users                     = [],
+  $create_users              = true,
+  $force_local_project_group = false,
+  $ensure                    = undef,
+  $description               = ""
 ) {
 
   # If least one project definition exists for this host, creaste the base structure
@@ -27,12 +29,20 @@ define projects::project (
     }
 
     group { $title:
-      gid     => $gid,
-      members => $users,
+      gid      => $gid,
+      members  => $users,
+      provider => $force_local_project_group ? {
+        true    => 'ggroupadd', # Requires pdxcat/group module
+        default => undef,
+      },
     }
 
-    project_user { $users:
-      group => $title
+    $users.each |$u| {
+      project_user { "${title} - user ${u}":
+        user        => $u,
+        group       => $title,
+        create_user => $create_users,
+      }
     }
 
     file { [
@@ -45,19 +55,19 @@ define projects::project (
     }
 
     file { "$::projects::basedir/$title/.ssh":
-      ensure   => 'directory',
-      owner  => $uid,
-      group  => $gid,
-      mode     => '700',
-      seltype  => 'ssh_home_t',
+      ensure  => 'directory',
+      owner   => $uid,
+      group   => $gid,
+      mode    => '700',
+      seltype => 'ssh_home_t',
     }
 
     file { "$::projects::basedir/$title/.settings":
-      ensure   => 'directory',
-      owner  => $uid,
-      group  => $gid,
-      mode     => '775',
-      seltype  => 'httpd_sys_content_t',
+      ensure  => 'directory',
+      owner   => $uid,
+      group   => $gid,
+      mode    => '775',
+      seltype => 'httpd_sys_content_t',
     }
 
     file { [
@@ -72,20 +82,20 @@ define projects::project (
     file { [
            "$::projects::basedir/$title/var",
            ] :
-      ensure => directory,
-      owner  => $uid,
-      group  => $gid,
+      ensure  => directory,
+      owner   => $uid,
+      group   => $gid,
       seltype => 'httpd_sys_rw_content_t',
-      mode   => '0775',
+      mode    => '0775',
     }
 
     file { [
            "$::projects::basedir/$title/lib",
            ] :
-      ensure => directory,
-      owner  => $uid,
-      group  => $gid,
-      mode   => '0775',
+      ensure  => directory,
+      owner   => $uid,
+      group   => $gid,
+      mode    => '0775',
       seltype => 'httpd_sys_content_t',
     }
 
@@ -123,7 +133,7 @@ define projects::project (
   # Create Tomcat services
   if ($tomcat != {}) {
     projects::project::tomcat { $title:
-      ajp_port      => pick($tomcat[ajp_port],'8009')
+      ajp_port => pick($tomcat[ajp_port],'8009')
     }
   }
 
@@ -144,10 +154,16 @@ define projects::project (
 }
 
 define project_user (
-  $group = undef
+  $user,
+  $group       = undef,
+  $create_user = true,
 ) {
-  create_resources('@user', { $title => {} })
-  User <| title == $title |> {
-    groups +> $group,
+  # If users are from an external directory, never try to create them locally
+  # Group managed with pdxcat/group and "group" resource in projects::project above
+  if $create_user {
+    create_resources('@user', { $user => {} })
+    User <| title == $user |> {
+      groups +> $group,
+    }
   }
 }

@@ -15,7 +15,7 @@
 class projects (
   $basedir = '/srv/projects',
   $symlink = [],
-  $projects = {},
+  $projects,
 ) inherits ::projects::params {
 
   file { $basedir:
