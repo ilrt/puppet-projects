@@ -22,8 +22,11 @@ define projects::project::apache (
     include ::apache::mod::proxy_http
     include ::apache::mod::proxy_ajp
     include ::apache::mod::headers
-    class {'::apache::mod::authnz_ldap':
-      verify_server_cert => false
+
+    unless $apache_common['no_ldap'] {
+      class {'::apache::mod::authnz_ldap':
+        verify_server_cert => false
+      }
     }
 
     include ::apache::mod::status
