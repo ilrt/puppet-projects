@@ -16,6 +16,7 @@ define projects::project::apache (
       service_enable        => true,
       server_signature      => 'Off',
       server_tokens         => 'Prod',
+      keepalive_timeout     => '3',
     })
     include ::apache::mod::proxy
     include ::apache::mod::alias
