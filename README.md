@@ -49,6 +49,15 @@ lookup_options:
 
 to common.yaml.
 
+The `onyxpoint/gpasswd` module must be installed for the group memberships to
+be added correctly. To install the module, add
+
+```
+mod 'onyxpoint-gpasswd', '1.0.6'
+```
+
+to `Puppetfile` in your control repository.
+
 ### Beginning with projects
 
 

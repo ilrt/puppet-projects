@@ -10,7 +10,6 @@ define projects::project (
   $uid                       = undef,
   $gid                       = undef,
   $users                     = [],
-  $create_users              = true,
   $force_local_project_group = false,
   $ensure                    = undef,
   $description               = ""
@@ -31,18 +30,6 @@ define projects::project (
     group { $title:
       gid      => $gid,
       members  => $users,
-      provider => $force_local_project_group ? {
-        true    => 'ggroupadd', # Requires pdxcat/group module
-        default => undef,
-      },
-    }
-
-    $users.each |$u| {
-      project_user { "${title} - user ${u}":
-        user        => $u,
-        group       => $title,
-        create_user => $create_users,
-      }
     }
 
     file { [
@@ -150,20 +137,5 @@ define projects::project (
   sudo::conf { "${title}-reset-perms":
     priority => 25,
     content  => "%${title} ALL=(ALL) NOPASSWD: /usr/local/bin/reset-perms"
-  }
-}
-
-define project_user (
-  $user,
-  $group       = undef,
-  $create_user = true,
-) {
-  # If users are from an external directory, never try to create them locally
-  # Group managed with pdxcat/group and "group" resource in projects::project above
-  if $create_user {
-    create_resources('@user', { $user => {} })
-    User <| title == $user |> {
-      groups +> $group,
-    }
   }
 }
