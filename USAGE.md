@@ -26,4 +26,3 @@ It is possible to start and stop the tomcat instance via sudo as the tomcat user
 # MySQL
 
 If your project has a MySQL component, a database and user will have been created.
-
