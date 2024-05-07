@@ -168,6 +168,7 @@ define projects::project::apache::vhost (
   $redirect_to_https = false,
   $php_values = {},
   $forwarded_custom_log = true,
+  $manage_firewall = true,
 ) {
 
   if ($ip) {
@@ -313,7 +314,7 @@ define projects::project::apache::vhost (
     { seltype => 'cert_t' }
   )
 
-  if !defined(Firewall["050 accept Apache ${port}"]) {
+  if !defined(Firewall["050 accept Apache ${port}"]) and $manage_firewall {
     firewall { "050 accept Apache ${port}":
       dport  => $port,
       proto  => tcp,
