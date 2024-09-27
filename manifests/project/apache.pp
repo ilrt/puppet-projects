@@ -242,7 +242,9 @@ define projects::project::apache::vhost (
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
-      headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      headers               => [
+        'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      ],
       *                     => $custom_log_entries,
     }
   }
@@ -261,7 +263,9 @@ define projects::project::apache::vhost (
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
-      headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      headers               => [
+        'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      ],
       *                     => $custom_log_entries,
     }
   }
@@ -287,7 +291,9 @@ define projects::project::apache::vhost (
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
-      headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      headers               => [
+        'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      ],
       php_values            => $php_values,
       *                     => $custom_log_entries,
     }
