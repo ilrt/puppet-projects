@@ -228,7 +228,7 @@ define projects::project::apache::vhost (
       redirect_status       => 'permanent',
       redirect_dest         => $redirect,
       logroot               => "${::projects::basedir}/${projectname}/var/log/httpd",
-      use_optional_includes => "true",
+      use_optional_includes => true,
       additional_includes   => 
       ["${::projects::basedir}/${projectname}/etc/apache/conf.d/*.conf",
       "${::projects::basedir}/${projectname}/etc/apache/conf.d/${title}/*.conf"],
@@ -254,7 +254,7 @@ define projects::project::apache::vhost (
       redirect_status       => 'permanent',
       redirect_dest         => "https://${title}/",
       logroot               => "${::projects::basedir}/${projectname}/var/log/httpd",
-      use_optional_includes => "true",
+      use_optional_includes => true,
       additional_includes   => 
       ["${::projects::basedir}/${projectname}/etc/apache/conf.d/*.conf",
       "${::projects::basedir}/${projectname}/etc/apache/conf.d/${title}/*.conf"],
@@ -273,7 +273,7 @@ define projects::project::apache::vhost (
       docroot               => $full_docroot,
       directories           => $directories,
       logroot               => "${::projects::basedir}/${projectname}/var/log/httpd",
-      use_optional_includes => "true",
+      use_optional_includes => true,
       additional_includes   => 
       ["${::projects::basedir}/${projectname}/etc/apache/conf.d/*.conf",
       "${::projects::basedir}/${projectname}/etc/apache/conf.d/${title}/*.conf"],
