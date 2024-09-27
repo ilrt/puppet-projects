@@ -228,7 +228,7 @@ define projects::project::apache::vhost (
       redirect_status       => 'permanent',
       redirect_dest         => $redirect,
       logroot               => "${::projects::basedir}/${projectname}/var/log/httpd",
-      use_optional_includes => "true",
+      use_optional_includes => true,
       additional_includes   => 
       ["${::projects::basedir}/${projectname}/etc/apache/conf.d/*.conf",
       "${::projects::basedir}/${projectname}/etc/apache/conf.d/${title}/*.conf"],
@@ -242,7 +242,9 @@ define projects::project::apache::vhost (
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
-      headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      headers               => [
+        'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      ],
       *                     => $custom_log_entries,
     }
   }
@@ -254,14 +256,16 @@ define projects::project::apache::vhost (
       redirect_status       => 'permanent',
       redirect_dest         => "https://${title}/",
       logroot               => "${::projects::basedir}/${projectname}/var/log/httpd",
-      use_optional_includes => "true",
+      use_optional_includes => true,
       additional_includes   => 
       ["${::projects::basedir}/${projectname}/etc/apache/conf.d/*.conf",
       "${::projects::basedir}/${projectname}/etc/apache/conf.d/${title}/*.conf"],
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
-      headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      headers               => [
+        'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      ],
       *                     => $custom_log_entries,
     }
   }
@@ -273,7 +277,7 @@ define projects::project::apache::vhost (
       docroot               => $full_docroot,
       directories           => $directories,
       logroot               => "${::projects::basedir}/${projectname}/var/log/httpd",
-      use_optional_includes => "true",
+      use_optional_includes => true,
       additional_includes   => 
       ["${::projects::basedir}/${projectname}/etc/apache/conf.d/*.conf",
       "${::projects::basedir}/${projectname}/etc/apache/conf.d/${title}/*.conf"],
@@ -287,7 +291,9 @@ define projects::project::apache::vhost (
       ip                    => $ip,
       ip_based              => $ip_based,
       add_listen            => false,
-      headers               => 'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      headers               => [
+        'Set Strict-Transport-Security "max-age=63072000; includeSubdomains;"',
+      ],
       php_values            => $php_values,
       *                     => $custom_log_entries,
     }
