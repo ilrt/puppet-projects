@@ -9,6 +9,10 @@
   "issues_url": "https://github.com/danfoster/puppet-projects/issues",
   "dependencies": [
     {
+      "name": "puppetlabs-firewall",
+      "version_requirement": ">= 7.0.0"
+    },
+    {
       "name": "puppetlabs-stdlib",
       "version_requirement": ">= 1.0.0"
     },
