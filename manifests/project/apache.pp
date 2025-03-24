@@ -324,7 +324,7 @@ define projects::project::apache::vhost (
     firewall { "050 accept Apache ${port}":
       dport  => $port,
       proto  => tcp,
-      action => accept,
+      jump => accept,
     }
   }
 
