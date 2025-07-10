@@ -152,6 +152,7 @@ define projects::project::apache (
 #   Enabled by default at present but a future release will disable this.
 #
 define projects::project::apache::vhost (
+  Enum['present', 'absent'] $ensure = 'present',
   $projectname = undef,
   $docroot = 'www',
   $options = ['Indexes','FollowSymLinks','MultiViews'],
@@ -221,6 +222,7 @@ define projects::project::apache::vhost (
 
   if $redirect {
     ::apache::vhost { $title:
+      ensure                => $ensure,
       servername            => $vhost_name,
       port                  => $port,
       ssl                   => $ssl,
@@ -250,6 +252,7 @@ define projects::project::apache::vhost (
   }
   elsif $redirect_to_https {
     ::apache::vhost { $title:
+      ensure                => $ensure,
       servername            => $vhost_name,
       port                  => $port,
       docroot               => $full_docroot,
@@ -271,6 +274,7 @@ define projects::project::apache::vhost (
   }
   else {
     ::apache::vhost { $title:
+      ensure                => $ensure,
       servername            => $vhost_name,
       port                  => $port,
       ssl                   => $ssl,
